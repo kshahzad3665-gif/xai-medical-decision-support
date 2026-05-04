@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XAI Healthcare Dashboard</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<!-- FONT AWESOME -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<!-- External CSS -->
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon"><i class="fas fa-heart-pulse"></i></div>
+      <div>
+        <div class="logo-text">XAI <span>Healthcare</span> Dashboard</div>
+        <div class="logo-sub">Explainable AI · Real-Time Prediction · MSc Dissertation</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <div class="header-badge"><div class="badge-dot"></div>API Connected</div>
+      <button class="btn-download" onclick="downloadReport()">
+        <i class="fas fa-download"></i> Export Report
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Hero Banner ────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-title">Explainable AI for Clinical Decision Support</div>
+      <div class="hero-subtitle">
+        Real-time disease prediction using Random Forest with SHAP and Partial Dependence Plots.
+      </div>
+      <div class="hero-pills">
+        <div class="hero-pill"><i class="fas fa-dna"></i> Diabetes Dataset</div>
+        <div class="hero-pill"><i class="fas fa-heartbeat"></i> Heart Dataset</div>
+        <div class="hero-pill"><i class="fas fa-brain"></i> SHAP · PDP</div>
+        <div class="hero-pill"><i class="fas fa-chart-bar"></i> D3.js</div>
+        <div class="hero-pill"><i class="fas fa-server"></i> Flask API</div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">76.7%</div>
+        <div class="hero-stat-lbl">Diabetes Accuracy</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">88.3%</div>
+        <div class="hero-stat-lbl">Heart Accuracy</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">2</div>
+        <div class="hero-stat-lbl">XAI Methods</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── XAI Method Cards ───────────────────────────────────────────────── -->
+<div class="xai-info-bar">
+  <div class="xai-info-inner">
+
+    <div class="xai-info-card">
+      <div class="xai-info-icon blue"><i class="fas fa-robot"></i></div>
+      <div>
+        <div class="xai-info-label">Random Forest</div>
+        <div class="xai-info-desc">Ensemble model for prediction.</div>
+      </div>
+    </div>
+
+    <div class="xai-info-card">
+      <div class="xai-info-icon red"><i class="fas fa-brain"></i></div>
+      <div>
+        <div class="xai-info-label">SHAP</div>
+        <div class="xai-info-desc">Explains feature contributions.</div>
+      </div>
+    </div>
+
+    <div class="xai-info-card">
+      <div class="xai-info-icon amber"><i class="fas fa-chart-line"></i></div>
+      <div>
+        <div class="xai-info-label">PDP</div>
+        <div class="xai-info-desc">Shows feature impact globally.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Pipeline ───────────────────────────────────────────────────────── -->
+<div class="pipeline">
+  <div class="pipeline-label">System Pipeline</div>
+  <div class="pipeline-steps">
+
+    <div class="pipeline-step">
+      <span class="pipeline-icon"><i class="fas fa-clipboard-list"></i></span>
+      <div class="pipeline-step-num">1</div>
+      <div class="pipeline-title">Patient Input</div>
+      <div class="pipeline-desc">Enter clinical values</div>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="pipeline-icon"><i class="fas fa-cogs"></i></span>
+      <div class="pipeline-step-num">2</div>
+      <div class="pipeline-title">Preprocessing</div>
+      <div class="pipeline-desc">Validate & scale inputs</div>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="pipeline-icon"><i class="fas fa-robot"></i></span>
+      <div class="pipeline-step-num">3</div>
+      <div class="pipeline-title">Prediction</div>
+      <div class="pipeline-desc">Model generates result</div>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="pipeline-icon"><i class="fas fa-brain"></i></span>
+      <div class="pipeline-step-num">4</div>
+      <div class="pipeline-title">Explanation</div>
+      <div class="pipeline-desc">SHAP & PDP analysis</div>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="pipeline-icon"><i class="fas fa-chart-bar"></i></span>
+      <div class="pipeline-step-num">5</div>
+      <div class="pipeline-title">Visualisation</div>
+      <div class="pipeline-desc">Charts rendered</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Tab Navigation ──────────────────────────────────────────────────── -->
+<div class="tab-nav">
+  <span class="tab-nav-label">Select Model</span>
+  <button class="tab-btn active" onclick="switchTab('diabetes', this)">
+    <span class="tab-icon"><i class="fa-solid fa-stethoscope"></i></span> Diabetes Prediction
+  </button>
+  <button class="tab-btn" onclick="switchTab('heart', this)">
+    <span class="tab-icon"><i class="fa-solid fa-heart"></i></span> Heart Disease Prediction
+  </button>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  DIABETES TAB                                                         -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-diabetes" class="tab-panel active">
+  <div class="grid-layout">
+
+    <!-- Input Panel -->
+    <div class="card" style="grid-row: span 2;">
+      <div class="card-header">
+        <div class="card-icon blue"><i class="fa-solid fa-clipboard-list"></i></div>
+        <div class="card-title">Patient Input — Diabetes</div>
+        <span class="card-meta">8 features · Pima Dataset</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fa-solid fa-circle-info"></i></span>
+          <span class="explain-text">Enter the patient's clinical values. All 8 fields are required and validated before submission. Values are automatically scaled by the training StandardScaler before reaching the model. <strong>Hover labels for reference ranges.</strong></span>
+        </div>
+        <div class="form-grid" id="diabetes-form">
+          <div class="form-group">
+            <label title="Dataset range: 0–17">Pregnancies</label>
+            <input type="number" id="d-pregnancies" placeholder="e.g. 3" min="0" max="20" step="1"/>
+            <span class="form-hint">Number of times pregnant (0–17)</span>
+          </div>
+          <div class="form-group">
+            <label title="Normal fasting: 70–99 mg/dL">Glucose (mg/dL)</label>
+            <input type="number" id="d-glucose" placeholder="e.g. 120" min="0" max="300" step="1"/>
+            <span class="form-hint">Plasma glucose — 2h oral test</span>
+          </div>
+          <div class="form-group">
+            <label title="Normal: 60–80 mmHg">Blood Pressure (mmHg)</label>
+            <input type="number" id="d-bloodpressure" placeholder="e.g. 72" min="0" max="150" step="1"/>
+            <span class="form-hint">Diastolic blood pressure</span>
+          </div>
+          <div class="form-group">
+            <label title="Normal: 10–50 mm">Skin Thickness (mm)</label>
+            <input type="number" id="d-skinthickness" placeholder="e.g. 23" min="0" max="100" step="1"/>
+            <span class="form-hint">Triceps skinfold thickness</span>
+          </div>
+          <div class="form-group">
+            <label title="Normal: 16–166 µU/mL">Insulin (µU/mL)</label>
+            <input type="number" id="d-insulin" placeholder="e.g. 85" min="0" max="850" step="1"/>
+            <span class="form-hint">2-hour serum insulin</span>
+          </div>
+          <div class="form-group">
+            <label title="Normal: 18.5–24.9">BMI (kg/m²)</label>
+            <input type="number" id="d-bmi" placeholder="e.g. 28.5" min="0" max="70" step="0.1"/>
+            <span class="form-hint">Body mass index</span>
+          </div>
+          <div class="form-group">
+            <label title="Range: 0.078–2.42">Diabetes Pedigree</label>
+            <input type="number" id="d-pedigree" placeholder="e.g. 0.47" min="0" max="3" step="0.01"/>
+            <span class="form-hint">Diabetes pedigree function</span>
+          </div>
+          <div class="form-group">
+            <label title="Dataset range: 21–81 years">Age (years)</label>
+            <input type="number" id="d-age" placeholder="e.g. 35" min="1" max="120" step="1"/>
+            <span class="form-hint">Patient age</span>
+          </div>
+        </div>
+        <button class="btn-predict" id="btn-diabetes" onclick="predict('diabetes')">
+          <div class="spinner" id="spinner-diabetes"></div>
+          <span id="btn-diabetes-text"><i class="fa-solid fa-magnifying-glass"></i> Run Prediction</span>
+        </button>
+        <button class="btn-clear" onclick="clearForm('diabetes')">Clear Form</button>
+      </div>
+    </div>
+
+    <!-- Prediction Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon teal"><i class="fa-solid fa-chart-column"></i></div>
+        <div class="card-title">Prediction Result</div>
+        <span class="card-meta">Random Forest · Gauge</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fa-solid fa-thumbtack"></i></span>
+          <span class="explain-text">The <strong>gauge</strong> shows estimated diabetes probability (0–100%). Threshold at 50%: above = Diabetic. Risk levels — <strong>Low</strong> &lt;35% · <strong>Moderate</strong> 35–65% · <strong>High</strong> &gt;65%.</span>
+        </div>
+        <div class="prediction-empty" id="pred-empty-diabetes">
+          <div class="empty-icon"><i class="fa-solid fa-microscope"></i></div>
+          <p>Enter patient data and run prediction</p>
+        </div>
+        <div class="prediction-result" id="pred-result-diabetes">
+          <div class="result-verdict" id="verdict-diabetes">
+            <span class="verdict-icon" id="verdict-icon-diabetes"></span>
+            <span id="verdict-text-diabetes"></span>
+          </div>
+          <div class="gauge-container">
+            <svg id="gauge-diabetes" width="200" height="120"></svg>
+            <div class="gauge-label">Disease Probability</div>
+          </div>
+          <div class="prob-details">
+            <div class="prob-stat">
+              <div class="prob-stat-label">Probability</div>
+              <div class="prob-stat-value" id="prob-val-diabetes">—</div>
+            </div>
+            <div class="prob-stat">
+              <div class="prob-stat-label">Risk Level</div>
+              <div class="prob-stat-value" id="risk-val-diabetes">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHAP Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red"><i class="fa-solid fa-brain"></i></div>
+        <div class="card-title">SHAP Feature Explanation</div>
+        <span class="card-meta">Permutation attribution</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fa-solid fa-circle"></i></span>
+          <span class="explain-text"><strong>Red bars</strong> increase diabetes risk for this patient; <strong>blue bars</strong> reduce it. Bar length = magnitude of influence. Features sorted by absolute importance.</span>
+        </div>
+        <div class="shap-empty" id="shap-empty-diabetes">
+          <div class="empty-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <p style="font-size:.82rem">SHAP values appear after prediction</p>
+        </div>
+        <div id="shap-chart-diabetes" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PDP Panel -->
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-header">
+      <div class="card-icon amber"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="card-title">Partial Dependence Plot (PDP)</div>
+      <span class="card-meta">Global marginal effect · averaged across all patients</span>
+      <div style="margin-left:auto;">
+        <div class="pdp-controls" style="margin:0;">
+          <label>Feature:</label>
+          <select class="pdp-select" id="pdp-select-diabetes" onchange="updatePDP('diabetes')">
+            <option value="">— Select feature —</option>
+            <option value="Glucose">Glucose</option>
+            <option value="BMI">BMI</option>
+            <option value="Age">Age</option>
+            <option value="BloodPressure">Blood Pressure</option>
+            <option value="Insulin">Insulin</option>
+            <option value="DiabetesPedigreeFunction">Pedigree Function</option>
+            <option value="Pregnancies">Pregnancies</option>
+            <option value="SkinThickness">Skin Thickness</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="explain-strip">
+        <span class="explain-icon"><i class="fa-solid fa-chart-bar"></i></span>
+        <span class="explain-text">The PDP line shows how <strong>average predicted probability</strong> changes as the selected feature varies across its observed range, with all other features held constant. Steep rises indicate clinically significant thresholds. <strong>Hover the chart</strong> for precise values at each point.</span>
+      </div>
+      <div class="pdp-empty" id="pdp-empty-diabetes">
+        <div class="empty-icon"><i class="fa-solid fa-chart-bar"></i></div>
+        <p style="font-size:.82rem">Run a prediction, then select a feature to explore</p>
+      </div>
+      <div id="pdp-chart-diabetes" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- History Strip -->
+  <div class="history-strip">
+    <div class="history-title"><i class="fa-solid fa-folder"></i> Session History — Diabetes</div>
+    <div class="history-list" id="history-diabetes">
+      <span style="font-size:.8rem;color:var(--text-3)">No predictions yet</span>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  HEART TAB                                                            -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-heart" class="tab-panel">
+  <div class="grid-layout">
+
+    <!-- Input Panel -->
+    <div class="card" style="grid-row: span 2;">
+      <div class="card-header">
+        <div class="card-icon red"><i class="fas fa-clipboard-list"></i></div>
+        <div class="card-title">Patient Input — Heart Disease</div>
+        <span class="card-meta">13 features · Cleveland Dataset</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fas fa-info-circle"></i></span>
+          <span class="explain-text">Enter the patient's cardiac clinical values. All 13 fields are required. Binary variables (Sex, Fasting BS, Exercise Angina) accept <strong>0 or 1</strong> only. The model predicts presence or absence of significant heart disease.</span>
+        </div>
+        <div class="form-grid" id="heart-form">
+          <div class="form-group">
+            <label>Age (years)</label>
+            <input type="number" id="h-age" placeholder="e.g. 55" min="1" max="120"/>
+            <span class="form-hint">Patient age (29–77 in dataset)</span>
+          </div>
+          <div class="form-group">
+            <label>Sex</label>
+            <input type="number" id="h-sex" placeholder="1=Male, 0=Female" min="0" max="1"/>
+            <span class="form-hint">1 = Male, 0 = Female</span>
+          </div>
+          <div class="form-group">
+            <label>Chest Pain Type (0–3)</label>
+            <input type="number" id="h-cp" placeholder="e.g. 1" min="0" max="3"/>
+            <span class="form-hint">0=Typical · 1=Atypical · 2=Non-anginal · 3=Asymptomatic</span>
+          </div>
+          <div class="form-group">
+            <label>Resting BP (mmHg)</label>
+            <input type="number" id="h-trestbps" placeholder="e.g. 130" min="0" max="250"/>
+            <span class="form-hint">Resting blood pressure on admission</span>
+          </div>
+          <div class="form-group">
+            <label>Cholesterol (mg/dL)</label>
+            <input type="number" id="h-chol" placeholder="e.g. 250" min="0" max="600"/>
+            <span class="form-hint">Serum cholesterol level</span>
+          </div>
+          <div class="form-group">
+            <label>Fasting Blood Sugar</label>
+            <input type="number" id="h-fbs" placeholder="1=Yes, 0=No" min="0" max="1"/>
+            <span class="form-hint">Fasting BS &gt;120 mg/dL? (1=Yes, 0=No)</span>
+          </div>
+          <div class="form-group">
+            <label>Resting ECG (0–2)</label>
+            <input type="number" id="h-restecg" placeholder="e.g. 1" min="0" max="2"/>
+            <span class="form-hint">0=Normal · 1=ST-T abnormal · 2=LVH</span>
+          </div>
+          <div class="form-group">
+            <label>Max Heart Rate</label>
+            <input type="number" id="h-thalach" placeholder="e.g. 150" min="60" max="220"/>
+            <span class="form-hint">Maximum heart rate achieved (60–220)</span>
+          </div>
+          <div class="form-group">
+            <label>Exercise Angina</label>
+            <input type="number" id="h-exang" placeholder="1=Yes, 0=No" min="0" max="1"/>
+            <span class="form-hint">Exercise-induced angina (1=Yes, 0=No)</span>
+          </div>
+          <div class="form-group">
+            <label>ST Depression (Oldpeak)</label>
+            <input type="number" id="h-oldpeak" placeholder="e.g. 1.5" min="0" max="10" step="0.1"/>
+            <span class="form-hint">ST depression induced by exercise</span>
+          </div>
+          <div class="form-group">
+            <label>Slope (0–2)</label>
+            <input type="number" id="h-slope" placeholder="e.g. 1" min="0" max="2"/>
+            <span class="form-hint">Slope of peak exercise ST segment</span>
+          </div>
+          <div class="form-group">
+            <label>CA (0–3)</label>
+            <input type="number" id="h-ca" placeholder="e.g. 0" min="0" max="3"/>
+            <span class="form-hint">Major vessels coloured by fluoroscopy</span>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label>Thal (0–3)</label>
+            <input type="number" id="h-thal" placeholder="e.g. 2" min="0" max="3"/>
+            <span class="form-hint">0=Normal · 1=Fixed defect · 2=Reversible defect</span>
+          </div>
+        </div>
+        <button class="btn-predict" id="btn-heart" onclick="predict('heart')">
+          <div class="spinner" id="spinner-heart"></div>
+          <span id="btn-heart-text"><i class="fas fa-search"></i> Run Prediction</span>
+        </button>
+        <button class="btn-clear" onclick="clearForm('heart')">Clear Form</button>
+      </div>
+    </div>
+
+    <!-- Prediction Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon teal"><i class="fas fa-chart-line"></i></div>
+        <div class="card-title">Prediction Result</div>
+        <span class="card-meta">Random Forest · Gauge</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fas fa-thumbtack"></i></span>
+          <span class="explain-text">The <strong>gauge</strong> shows probability of significant heart disease. Threshold at 50%: above = Heart Disease Detected. Risk levels — <strong>Low</strong> &lt;35% · <strong>Moderate</strong> 35–65% · <strong>High</strong> &gt;65%.</span>
+        </div>
+        <div class="prediction-empty" id="pred-empty-heart">
+          <div class="empty-icon"><i class="fas fa-heart"></i></div>
+          <p>Enter patient data and run prediction</p>
+        </div>
+        <div class="prediction-result" id="pred-result-heart">
+          <div class="result-verdict" id="verdict-heart">
+            <span class="verdict-icon" id="verdict-icon-heart"></span>
+            <span id="verdict-text-heart"></span>
+          </div>
+          <div class="gauge-container">
+            <svg id="gauge-heart" width="200" height="120"></svg>
+            <div class="gauge-label">Disease Probability</div>
+          </div>
+          <div class="prob-details">
+            <div class="prob-stat">
+              <div class="prob-stat-label">Probability</div>
+              <div class="prob-stat-value" id="prob-val-heart">—</div>
+            </div>
+            <div class="prob-stat">
+              <div class="prob-stat-label">Risk Level</div>
+              <div class="prob-stat-value" id="risk-val-heart">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHAP Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red"><i class="fas fa-brain"></i></div>
+        <div class="card-title">SHAP Feature Explanation</div>
+        <span class="card-meta">Permutation attribution</span>
+      </div>
+      <div class="card-body">
+        <div class="explain-strip">
+          <span class="explain-icon"><i class="fas fa-circle"></i></span>
+          <span class="explain-text"><strong>Red bars</strong> increase heart disease risk; <strong>blue bars</strong> reduce it. Bar length = magnitude of contribution to this specific prediction. Sorted by absolute importance.</span>
+        </div>
+        <div class="shap-empty" id="shap-empty-heart">
+          <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+          <p style="font-size:.82rem">SHAP values appear after prediction</p>
+        </div>
+        <div id="shap-chart-heart" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- PDP Panel -->
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-header">
+      <div class="card-icon amber"><i class="fas fa-chart-area"></i></div>
+      <div class="card-title">Partial Dependence Plot (PDP)</div>
+      <span class="card-meta">Global marginal effect · averaged across all patients</span>
+      <div style="margin-left:auto;">
+        <div class="pdp-controls" style="margin:0;">
+          <label>Feature:</label>
+          <select class="pdp-select" id="pdp-select-heart" onchange="updatePDP('heart')">
+            <option value="">— Select feature —</option>
+            <option value="Age">Age</option>
+            <option value="MaxHR">Max Heart Rate</option>
+            <option value="Cholesterol">Cholesterol</option>
+            <option value="RestingBP">Resting BP</option>
+            <option value="Oldpeak">ST Depression</option>
+            <option value="CA">CA (vessels)</option>
+            <option value="Thal">Thal</option>
+            <option value="ChestPainType">Chest Pain Type</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="explain-strip">
+        <span class="explain-icon"><i class="fas fa-chart-bar"></i></span>
+        <span class="explain-text">The PDP reveals the <strong>global marginal relationship</strong> between a cardiac feature and predicted heart disease probability. A steep positive slope indicates a clinically important threshold — e.g. ST depression rising above 2.0 sharply increases predicted risk. <strong>Hover</strong> for precise values.</span>
+      </div>
+      <div class="pdp-empty" id="pdp-empty-heart">
+        <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+        <p style="font-size:.82rem">Run a prediction, then select a feature to explore</p>
+      </div>
+      <div id="pdp-chart-heart" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- History Strip -->
+  <div class="history-strip">
+    <div class="history-title"><i class="fas fa-folder"></i> Session History — Heart Disease</div>
+    <div class="history-list" id="history-heart">
+      <span style="font-size:.8rem;color:var(--text-3)">No predictions yet</span>
+    </div>
+  </div>
+</div><!-- /tab-heart -->
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                               -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+
+      <!-- Brand -->
+      <div>
+        <div class="logo" style="margin-bottom:.85rem;">
+          <div class="logo-icon" style="width:34px;height:34px;font-size:1rem;"><i class="fas fa-staff-snake"></i></div>
+          <div>
+            <div class="logo-text" style="font-size:1rem;">XAI <span>Healthcare</span></div>
+            <div class="logo-sub">Dashboard · MSc Dissertation 2026</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.45rem;margin-top:.9rem;flex-wrap:wrap;">
+          <span class="fbadge blue"><i class="fas fa-graduation-cap"></i> MSc Information Technology</span>
+          <span class="fbadge teal"><i class="fas fa-university"></i> Leeds Beckett University</span>
+        </div>
+      </div>
+
+      <!-- System -->
+      <div>
+        <div class="footer-col-title">System</div>
+        <ul class="footer-links">
+          <li><span><i class="fas fa-robot"></i></span> Random Forest (200 trees)</li>
+          <li><span><i class="fas fa-brain"></i></span> SHAP Permutation Attribution</li>
+          <li><span><i class="fas fa-chart-line"></i></span> Partial Dependence Plots</li>
+          <li><span><i class="fab fa-python"></i></span> Flask REST API (Python 3.11)</li>
+          <li><span><i class="fas fa-chart-bar"></i></span> D3.js v7 Visualisations</li>
+        </ul>
+      </div>
+
+      <!-- Datasets -->
+      <div>
+        <div class="footer-col-title">Datasets</div>
+        <ul class="footer-links">
+          <li><span><i class="fas fa-stethoscope"></i></span> Pima Indians Diabetes</li>
+          <li><span><i class="fas fa-map-marker-alt"></i></span> Source: Kaggle / UCI ML Repo</li>
+          <li><span><i class="fas fa-users"></i></span> 768 patient records · 8 features</li>
+          <li><span><i class="fas fa-heartbeat"></i></span> Cleveland Heart Disease</li>
+          <li><span><i class="fas fa-map-marker-alt"></i></span> Source: UCI ML Repository</li>
+          <li><span><i class="fas fa-users"></i></span> 303 records · 13 features</li>
+        </ul>
+      </div>
+
+      <!-- References -->
+      <div>
+        <div class="footer-col-title">Key References</div>
+        <ul class="footer-links">
+          <li><span><i class="fas fa-book"></i></span> Lundberg & Lee (2017) — SHAP</li>
+          <li><span><i class="fas fa-book"></i></span> Friedman (2001) — PDP</li>
+          <li><span><i class="fas fa-book"></i></span> Hevner et al. (2004) — DSR</li>
+          <li><span><i class="fas fa-book"></i></span> Loh et al. (2022) — XAI Review</li>
+          <li><span><i class="fas fa-exclamation-triangle"></i></span> <span class="hl">Research prototype only</span></li>
+        </ul>
+      </div>
+
+    </div><!-- /footer-top -->
+
+    <div class="footer-bottom">
+      <div class="footer-copy">
+        <strong>Khizar Shahzad</strong> · Student ID: c7556498 · MSc Information Technology<br>
+        Leeds Beckett University · School of Built Environment, Engineering and Computing · 2026
+      </div>
+      <div class="footer-badges">
+        <span class="fbadge blue"><i class="fas fa-chart-bar"></i> D3.js v7</span>
+        <span class="fbadge teal"><i class="fab fa-python"></i> Flask 3.0</span>
+        <span class="fbadge amber"><i class="fas fa-robot"></i> scikit-learn</span>
+        <span class="fbadge green"><i class="fas fa-check-circle"></i> BCS Compliant</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── Tooltip ──────────────────────────────────────────────────────────── -->
+<div class="d3-tooltip" id="d3-tooltip"></div>
+
+<!-- ── Toast ───────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+  <span id="toast-icon"><i class="fas fa-info-circle"></i></span>
+  <span id="toast-msg"></span>
+</div>
+<!-- External JS -->
+<script src="script.js"></script>
+</body>
+</html>
